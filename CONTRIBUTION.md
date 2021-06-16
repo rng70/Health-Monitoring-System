@@ -16,7 +16,7 @@ There are a few things you need to know and they are listed below
 
 ---
 
-All work of the project happens directly on [GitHub](https://github.com/facebook/react). All contributors should send pull requests which go through the same review process or called “Peer Review”.
+All work of the project happens directly on [GitHub](https://github.com/rng70/Health-Monitoring-System). All contributors should send pull requests which go through the same review process or called “Peer Review”.
 
 
 
