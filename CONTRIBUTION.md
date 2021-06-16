@@ -30,6 +30,14 @@ If you don’t know what is “Camel Case Naming Convention”, then have a look
 
 
 
+### File Structure
+
+---
+
+If any file(.pdf, .docs, .png) instead of code upload to it’s own folder like image in Image(s) folder, pdf in Presentation(s) folder to keep it simple and clean.
+
+
+
 ### Branch Organization
 
 ---
@@ -45,10 +53,3 @@ Before push you don’t need to pull every time but if you want to keep your loc
 ---
 
 ---
-
-
-
-
-
-
-
