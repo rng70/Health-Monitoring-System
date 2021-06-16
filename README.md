@@ -24,6 +24,8 @@ Overall system design is included here,
 
 ![System Design](./Image(s)/System_Design.png)
 
+
+
 # Hardware
 
 * Processors
@@ -47,3 +49,14 @@ Overall system design is included here,
   * Jumper Wires
 
 ---
+
+
+
+# Contribution
+
+---
+
+Want to contribute? 
+
+Before contribution read [CONTRIBUTION.md](./CONTRIBUTION.md)
+
