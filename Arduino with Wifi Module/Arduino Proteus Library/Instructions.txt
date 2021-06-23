@@ -1,0 +1,14 @@
+	|
+	|
+	--> Copy and Paste the files: ARDUINO2.IDX and ARDUINO2.LIB in...
+	
+		C:\ProgramData\Labcenter Electronics\Proteus 8 Professional\LIBRARY
+	or,
+
+		C:\Program Files\Labcenter Electronics\Proteus 7 Professional\LIBRARY	
+	or,
+
+		C:\Program Files\Labcenter Electronics\Proteus 8 Professional\Data\LIBRARY
+	or, 
+	
+		another directory of the libraries of the Proteus.
