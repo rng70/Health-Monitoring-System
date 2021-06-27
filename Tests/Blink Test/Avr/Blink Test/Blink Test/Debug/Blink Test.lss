@@ -72,40 +72,40 @@ Disassembly of section .text:
 int main(void)
 {
     /* Set Port B for output */
-	DDRB |= (1 << PINB0);
-  6c:	87 b3       	in	r24, 0x17	; 23
-  6e:	81 60       	ori	r24, 0x01	; 1
-  70:	87 bb       	out	0x17, r24	; 23
+	DDRD |= (1 << PIND6);
+  6c:	81 b3       	in	r24, 0x11	; 17
+  6e:	80 64       	ori	r24, 0x40	; 64
+  70:	81 bb       	out	0x11, r24	; 17
 	
     while (1) 
     {
-		PORTB |= (1 << PINB0);
-  72:	88 b3       	in	r24, 0x18	; 24
-  74:	81 60       	ori	r24, 0x01	; 1
-  76:	88 bb       	out	0x18, r24	; 24
+		PORTD |= (1 << PIND6);
+  72:	82 b3       	in	r24, 0x12	; 18
+  74:	80 64       	ori	r24, 0x40	; 64
+  76:	82 bb       	out	0x12, r24	; 18
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  78:	2f e3       	ldi	r18, 0x3F	; 63
-  7a:	8d e0       	ldi	r24, 0x0D	; 13
-  7c:	93 e0       	ldi	r25, 0x03	; 3
+  78:	2f ef       	ldi	r18, 0xFF	; 255
+  7a:	80 e7       	ldi	r24, 0x70	; 112
+  7c:	92 e0       	ldi	r25, 0x02	; 2
   7e:	21 50       	subi	r18, 0x01	; 1
   80:	80 40       	sbci	r24, 0x00	; 0
   82:	90 40       	sbci	r25, 0x00	; 0
   84:	e1 f7       	brne	.-8      	; 0x7e <main+0x12>
   86:	00 c0       	rjmp	.+0      	; 0x88 <main+0x1c>
   88:	00 00       	nop
-		_delay_ms(1000);
-		PORTB &= ~(1 << PINB0);
-  8a:	88 b3       	in	r24, 0x18	; 24
-  8c:	8e 7f       	andi	r24, 0xFE	; 254
-  8e:	88 bb       	out	0x18, r24	; 24
-  90:	2f e3       	ldi	r18, 0x3F	; 63
-  92:	8d e0       	ldi	r24, 0x0D	; 13
-  94:	93 e0       	ldi	r25, 0x03	; 3
+		_delay_ms(50);
+		PORTD &= ~(1 << PIND6);
+  8a:	82 b3       	in	r24, 0x12	; 18
+  8c:	8f 7b       	andi	r24, 0xBF	; 191
+  8e:	82 bb       	out	0x12, r24	; 18
+  90:	2f ef       	ldi	r18, 0xFF	; 255
+  92:	80 e7       	ldi	r24, 0x70	; 112
+  94:	92 e0       	ldi	r25, 0x02	; 2
   96:	21 50       	subi	r18, 0x01	; 1
   98:	80 40       	sbci	r24, 0x00	; 0
   9a:	90 40       	sbci	r25, 0x00	; 0
