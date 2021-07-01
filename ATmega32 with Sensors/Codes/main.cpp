@@ -1,5 +1,5 @@
+#define F_CPU 16000000
 #include<avr/io.h>
-#define F_CPU 1000000
 #include<avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>
@@ -21,9 +21,9 @@ uint8_t Receive_data()			/* receive data */
 		while((PINB & (1<<DHT11_PIN)) == 0);  /* check received bit 0 or 1 */
 		_delay_us(30);
 		if(PINB & (1<<DHT11_PIN))/* if high pulse is greater than 30ms */
-		c = (c<<1)|(0x01);	/* then its logic HIGH */
+		    c = (c<<1)|(0x01);	/* then its logic HIGH */
 		else			/* otherwise its logic LOW */
-		c = (c<<1);
+		    c = (c<<1);
 		while(PINB & (1<<DHT11_PIN));
 	}
 	return c;
