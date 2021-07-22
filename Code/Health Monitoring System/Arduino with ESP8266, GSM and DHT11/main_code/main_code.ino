@@ -35,6 +35,9 @@ volatile int myBPM;
 volatile float dhtHumidity;
 volatile float celciusTemperature;
 
+unsigned long previousMillis = 0; // last time update
+long interval = 300000; // interval at which to do something (milliseconds)(5 min)
+
 void setup() {
   /* put your setup code here, to run once: */
   pulseSensor.analogInput(PulseWire);   
@@ -190,6 +193,13 @@ boolean SMSRequest() {
 }
 
 boolean itsTimeToSendSMS(){
+  unsigned long currentMillis = millis();
+
+  if(currentMillis - previousMillis > interval) {
+     previousMillis = currentMillis; 
+     return true;
+  }
+  else
   return false;
 }
 void simModule(){
