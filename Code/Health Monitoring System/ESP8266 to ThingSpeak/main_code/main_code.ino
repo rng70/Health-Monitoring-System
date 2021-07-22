@@ -25,7 +25,7 @@ void setup() {
   WiFi.begin(WIFISSID, PASSWORD); 
   
   while(WiFi.status() != WL_CONNECTED){
-    delay(200);
+    delay(2000);
     Serial.println("Reconnecting...");
   }
   

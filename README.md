@@ -22,7 +22,7 @@ In this project, we implemented a microcontroller-based health monitoring system
 
 Overall system design is included here,
 
-![System Design](./Image(s)/System_Design.png)
+![System Design](./Image/System_Design.png)
 
 
 
@@ -30,19 +30,17 @@ Overall system design is included here,
 
 * Processors
   * ATmega32
-  * Arduino-Uno (built-in ATmega328)
+  * Arduino-Uno (built-in ATmega328p)
   * ESP8266 WiFi Module
-  * GSM Module
+  * GSM Module (SIM800L)
 * Sensors
   * Pulse Sensor
-  * Body Temperature Sensor(LM35)
-  * Room Temperature Sensor(DHT11)
-  * CO Sensor(MQ-9)
-  * CO<sub>2</sub> Sensor(MQ-139)
+  * Body Temperature Sensor (LM35)
+  * Room Temperature Sensor (DHT11)
 * Others
   * BreadBoard
   * Battery
-  * Burner
+  * USB AVR ISP programmer
   * LCD Display
   * Resistor, Capacitor, and Inductor
   * Potentiometer
@@ -60,3 +58,8 @@ Want to contribute?
 
 Before contribution read [CONTRIBUTION.md](./CONTRIBUTION.md)
 
+
+
+---
+
+---
