@@ -1,12 +1,13 @@
 #include <DHT.h>
-/*#include <GSM.h>*/
 #include <DHT_U.h>
 #include<LiquidCrystal.h>
 #include <SoftwareSerial.h>
 #include <Adafruit_Sensor.h>
 
-#define RX 3
-#define TX 4
+#define ETX 3
+#define ERX 4
+#define GTX 10
+#define GRX 11
 #define DHTPIN 2                       /* Define PIN for DHT11 sensor. It's digital PIN */
 #define TEMPTYPE 0                     /* For reading temperature in celcius */
 #define DHTTYPE DHT11
@@ -17,8 +18,8 @@
 #include <PulseSensorPlayground.h>     /* Includes the PulseSensorPlayground Library. */
 
 /* Variables */
-SoftwareSerial sim800(4, 3);
-SoftwareSerial esp8266(RX, TX);               /* For esp8266 module */
+SoftwareSerial sim800(GTX, GRX);
+SoftwareSerial esp8266(ETX, ERX);               /* For esp8266 module */
 DHT dhtSensor(DHTPIN, DHTTYPE);
 LiquidCrystal lcd(5, 6, 7, 8, 9, 10);
 PulseSensorPlayground pulseSensor;      /* Creates an instance of the PulseSensorPlayground object called "pulseSensor" */
@@ -45,7 +46,7 @@ void setup() {
    
   Serial.begin(9600);
   esp8266.begin(115200);
-  sim800.begin(19200);
+  sim800.begin(9600);
   
   lcd.begin(16,2);
   lcd.setCursor(1,0);
@@ -158,6 +159,7 @@ boolean dataIsClean(){
 }
 
 boolean SMSRequest() {
+  Serial.println("In smsrequest");
   if(sim800.available() > 0) {
     incomingChar=sim800.read();
     if(incomingChar=='S') {
@@ -208,7 +210,7 @@ void simModule(){
       sim800.println("AT + CMGS = \"+8801735590153\"");
       delay(100);
 
-      String dataMessage = "Patient Name: Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "°C Room Condition:\n\tRoom Temperature: " + (String)celciusTemperature + "°C\n\tRoom Humidity: "+(String)dhtHumidity+"%";
+      String dataMessage = "Name: Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "°C Room Condition:\n\tRoom Temperature: " + (String)celciusTemperature + "°C\n\tRoom Humidity: "+(String)dhtHumidity+"%";
 
       sim800.print(dataMessage);
       delay(100);
