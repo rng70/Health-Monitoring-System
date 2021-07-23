@@ -18,8 +18,6 @@
 #include <PulseSensorPlayground.h>     /* Includes the PulseSensorPlayground Library. */
 
 /* Variables */
-SoftwareSerial sim800(GTX, GRX);
-SoftwareSerial esp8266(ETX, ERX);               /* For esp8266 module */
 DHT dhtSensor(DHTPIN, DHTTYPE);
 SoftwareSerial sim800(GTX, GRX);
 SoftwareSerial esp8266(ETX, ERX);       /* For esp8266 module */
@@ -37,19 +35,18 @@ volatile int myBPM;
 volatile float dhtHumidity;
 volatile float celciusTemperature;
 
-unsigned long previousMillis = 0; // last time update
-long interval = 300000; // interval at which to do something (milliseconds)(5 min)
+unsigned long previousMillis = 0; /* last time update */
+long interval = 300000; /* interval at which to do something (milliseconds)(5 min) */
 
 void setup() {
   /* put your setup code here, to run once: */
   pulseSensor.analogInput(PulseWire);   
-  pulseSensor.blinkOnPulse(LED13);      /* auto-magically blink Arduino's LED with heartbeat. */
+  pulseSensor.blinkOnPulse(LED13);      /* auto-magically blink Arduino's LED with heartbeat */
   pulseSensor.setThreshold(Threshold);
    
   Serial.begin(9600);
   sim800.begin(9600);
   esp8266.begin(115200);
-  sim800.begin(9600);
   
   lcd.begin(16,2);
   lcd.clear();
@@ -59,17 +56,23 @@ void setup() {
   delay(UNIVERSALDELAY/2);
    
   if(pulseSensor.begin()){
-    Serial.print("Starting...");
+    Serial.println("Starting...");
   }
 
-  // Give time to your GSM shield log on to network
+  /* Give time to your GSM shield log on to network */
   delay(20000);
+  
+  Serial.println();
+  Serial.printlb("SIM800 ready...");
+
+  /* AT command to set SIM800 to SMS mode */
   Serial.print("SIM800 ready...");
 
   // AT command to set SIM800 to SMS mode
   sim800.print("AT+CMGF=1\r"); 
   delay(100);
-  // Set module to send SMS data to serial out upon receipt 
+  
+  /* Set module to send SMS data to serial out upon receipt */ 
   sim800.print("AT+CNMI=2,2,0,0,0\r");
   delay(100);
 }
@@ -151,7 +154,7 @@ void dht11Sensor(){
 }
 
 void esp8266Module(){
-  Serial.println("<--------------- In esp --------------->");
+  Serial.println("<--------------- Sending through ESP8266 --------------->");
     
   Serial.print("HeartBeat: ");
   Serial.println(myBPM);
@@ -171,6 +174,13 @@ void esp8266Module(){
   esp8266.flush();
   //delay(5000);
 
+  Serial.print("Body Temperature: ");
+  Serial.println(lm35Temp);
+  esp8266.write(lm35Temp);
+  esp8266.flush();
+  //delay(5000);
+
+  Serial.println("<--------------- Successfully Sent --------------->");
 }
 
 boolean dataIsClean(){
@@ -297,16 +307,18 @@ void simModule(){
 
 void loop(){
   /* put your main code here, to run repeatedly: */
-  //lcd.clear();
+  /* lcd.clear(); */
   lcd.setCursor(1,0);
   
   pulseSensorMethod();
   delay(UNIVERSALDELAY/25);
+  
   dht11Sensor();  
   delay(UNIVERSALDELAY/25);
+  
   esp8266Module();
-  Serial.println("-------------------- After esp ----------------");
   //delay(UNIVERSALDELAY*5);
+
   simModule();
   delay(UNIVERSALDELAY);
 }
