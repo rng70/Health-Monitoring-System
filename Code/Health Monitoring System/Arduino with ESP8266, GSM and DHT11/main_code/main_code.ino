@@ -1,12 +1,13 @@
 #include <DHT.h>
-/*#include <GSM.h>*/
 #include <DHT_U.h>
 #include<LiquidCrystal.h>
 #include <SoftwareSerial.h>
 #include <Adafruit_Sensor.h>
 
-#define RX 3
-#define TX 4
+#define ETX 3
+#define ERX 4
+#define GTX 10
+#define GRX 11
 #define DHTPIN 2                       /* Define PIN for DHT11 sensor. It's digital PIN */
 #define TEMPTYPE 0                     /* For reading temperature in celcius */
 #define DHTTYPE DHT11
@@ -17,15 +18,15 @@
 #include <PulseSensorPlayground.h>     /* Includes the PulseSensorPlayground Library. */
 
 /* Variables */
-SoftwareSerial sim800(4, 3);
-SoftwareSerial esp8266(RX, TX);               /* For esp8266 module */
 DHT dhtSensor(DHTPIN, DHTTYPE);
-LiquidCrystal lcd(5, 6, 7, 8, 9, 10);
+SoftwareSerial sim800(GTX, GRX);
+SoftwareSerial esp8266(ETX, ERX);       /* For esp8266 module */
 PulseSensorPlayground pulseSensor;      /* Creates an instance of the PulseSensorPlayground object called "pulseSensor" */
+LiquidCrystal lcd(5, 6, 7, 8, 9, 10);   /* R, En, D5-D7 respectively */
 
 char incomingChar;
 
-volatile float lm35Temp = 11.0;
+volatile float lm35Temp = 0.0;
 volatile const int PulseWire = 0;       /* PulseSensor PURPLE WIRE connected to ANALOG PIN 0 */
 volatile const int LED13 = 13;          /* The on-board Arduino LED, close to PIN 13. */
 volatile int Threshold = 550;           /* Determine which Signal to "count as a beat" and which to ignore. */
@@ -44,10 +45,11 @@ void setup() {
   pulseSensor.setThreshold(Threshold);
    
   Serial.begin(9600);
+  sim800.begin(9600);
   esp8266.begin(115200);
-  sim800.begin(19200);
   
   lcd.begin(16,2);
+  lcd.clear();
   lcd.setCursor(1,0);
   
   dhtSensor.begin();
@@ -59,9 +61,9 @@ void setup() {
 
   // Give time to your GSM shield log on to network
   delay(20000);
-  Serial.print("SIM900 ready...");
+  Serial.print("SIM800 ready...");
 
-  // AT command to set SIM900 to SMS mode
+  // AT command to set SIM800 to SMS mode
   sim800.print("AT+CMGF=1\r"); 
   delay(100);
   // Set module to send SMS data to serial out upon receipt 
@@ -69,12 +71,15 @@ void setup() {
   delay(100);
 }
 
-/*void serialEvent(){
+void serialEvent(){
  if(Serial.available()) {
-    // get the new byte:
-    int temp = Serial.read();
-    lm35Temp=temp*0.25*4.0;
+    /* get the new byte: */
+    for(int i=0;i<100;i++){
+      float temp = (float)Serial.read();
+      lm35Temp += temp*0.25*4.0;
+    }
 
+    lm35Temp /= 100.0;
     if(lm35Temp < 30.0){
       lm35Temp = 30.0 + abs(30.0 - lm35Temp);
     }
@@ -86,26 +91,30 @@ void setup() {
     Serial.print(lm35Temp);
     Serial.println(F("°C"));
     
-    lcd.setCursor(1,1);
+    lcd.setCursor(0,0);
+    lcd.print("BodyTemp:");
+    lcd.setCursor(10, 0);
     lcd.print(lm35Temp);
-    lcd.setCursor(4,1);
-    lcd.print("C       ");
-    delay(1000);
+    lcd.setCursor(15,0);
+    lcd.print("C");
+    delay(6000);
   }
-}*/
+}
 
 void pulseSensorMethod(){
   myBPM = pulseSensor.getBeatsPerMinute();      /* Calls function on our pulseSensor object that returns BPM as an "int". */
                                          
-  if (pulseSensor.sawStartOfBeat()){                /* Constantly test to see if "a beat happened". */ 
-    Serial.println("♥ A HeartBeat Happened ! ");    /* If test is "true", print a message "a heartbeat happened". */
-    Serial.print("BPM: ");                          /* Print phrase "BPM: " */ 
-    Serial.println(myBPM);  
-    lcd.clear();                                    /* Print the value inside of myBPM. */ 
-    lcd.setCursor(1,0);
+  if (pulseSensor.sawStartOfBeat()){                 /* Constantly test to see if "a beat happened". */ 
+    Serial.println("♥ A HeartBeat Happened ! ");     /* If test is "true", print a message "a heartbeat happened". */
+    Serial.print("BPM: ");                           /* Print phrase "BPM: " */ 
+    Serial.println(myBPM);                           /* Print the value inside of myBPM. */ 
+    lcd.setCursor(0,1);
+    lcd.print("Heartbeat: ");
+    lcd.setCursor(10,1);
     lcd.print(myBPM);
-    lcd.setCursor(4,0);
-    lcd.print("BPM             ");
+    lcd.setCursor(13,1);
+    lcd.print("BPM");
+    delay(2000);
   }
 }
 
@@ -118,6 +127,24 @@ void dht11Sensor(){
   Serial.print(" Celcius Temperature: ");
   Serial.print(celciusTemperature);
   Serial.println("°C");
+
+  if(!isnan(dhtHumidity) && !isnan(celciusTemperature)){
+    lcd.setCursor(0,1);
+    lcd.print("Room Temp: ");
+    lcd.setCursor(11,1);
+    lcd.print(celciusTemperature);
+    lcd.setCursor(15,1);
+    lcd.print("C");
+
+    delay(2000);
+    int iHM = (int)dhtHumidity;
+    lcd.setCursor(0,1);
+    lcd.print("RoomHumidity:");
+    lcd.setCursor(13,1);
+    lcd.print(iHM);
+    lcd.setCursor(15,1);
+    lcd.print("%");
+  }
 }
 
 void esp8266Module(){
@@ -158,25 +185,26 @@ boolean dataIsClean(){
 }
 
 boolean SMSRequest() {
+  Serial.println("In smsrequest");
   if(sim800.available() > 0) {
     incomingChar=sim800.read();
-    if(incomingChar=='S') {
+    if(incomingChar=='S' || incomingChar=='s') {
       delay(10);
       Serial.print(incomingChar);
       incomingChar=sim800.read();
-      if(incomingChar =='T') {
+      if(incomingChar =='T' || incomingChar=='t') {
         delay(10);
         Serial.print(incomingChar);
         incomingChar=sim800.read();
-        if(incomingChar=='A') {
+        if(incomingChar=='A' || incomingChar=='a') {
           delay(10);
           Serial.print(incomingChar);
           incomingChar=sim800.read();
-          if(incomingChar=='T') {
+          if(incomingChar=='T' || incomingChar=='t') {
             delay(10);
             Serial.print(incomingChar);
             incomingChar=sim800.read();
-            if(incomingChar=='E') {
+            if(incomingChar=='E' || incomingChar=='e') {
               delay(10);
               Serial.print(incomingChar);
               Serial.print("...Request Received \n");
@@ -191,13 +219,13 @@ boolean SMSRequest() {
 }
 
 boolean itsTimeToSendSMS(){
-  unsigned long currentMillis = millis();
+  //unsigned long currentMillis = millis();
 
-  if(currentMillis - previousMillis > interval) {
-     previousMillis = currentMillis; 
-     return true;
-  }
-  else
+  //if(currentMillis - previousMillis > interval) {
+     //previousMillis = currentMillis; 
+     //return true;
+  //}
+  //else
   return false;
 }
 void simModule(){
@@ -208,7 +236,7 @@ void simModule(){
       sim800.println("AT + CMGS = \"+8801735590153\"");
       delay(100);
 
-      String dataMessage = "Patient Name: Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "°C Room Condition:\n\tRoom Temperature: " + (String)celciusTemperature + "°C\n\tRoom Humidity: "+(String)dhtHumidity+"%";
+      String dataMessage = "Name: Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "°C Room Condition:\n\tRoom Temperature: " + (String)celciusTemperature + "°C\n\tRoom Humidity: "+(String)dhtHumidity+"%";
 
       sim800.print(dataMessage);
       delay(100);
@@ -238,7 +266,7 @@ void simModule(){
       sim800.println("AT + CMGS = \"+8801735590153\"");
       delay(100);
 
-      String dataMessage = "Patient Name: Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "°C Room Condition:\n\tRoom Temperature: " + (String)celciusTemperature + "°C\n\tRoom Humidity: "+(String)dhtHumidity+"%";
+      String dataMessage = "Name: Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "°C Room Condition:\n\tRoom Temperature: " + (String)celciusTemperature + "°C\n\tRoom Humidity: "+(String)dhtHumidity+"%";
 
       sim800.print(dataMessage);
       delay(100);
@@ -266,16 +294,16 @@ void simModule(){
 
 void loop(){
   /* put your main code here, to run repeatedly: */
+  //lcd.clear();
   lcd.setCursor(1,0);
   
   pulseSensorMethod();
   delay(UNIVERSALDELAY/25);
-  //Serial.println("After pulse sensor");
   dht11Sensor();  
-  delay(UNIVERSALDELAY);
+  delay(UNIVERSALDELAY/25);
   esp8266Module();
   Serial.println("-------------------- After esp ----------------");
-  delay(UNIVERSALDELAY*5);
+  //delay(UNIVERSALDELAY*5);
   simModule();
   delay(UNIVERSALDELAY);
 }

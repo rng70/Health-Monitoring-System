@@ -2,16 +2,16 @@
 #include <ThingSpeak.h>
 #include <ESP8266WiFi.h>
 
-#define WIFISSID "Arafat Tanin"
 #define CHANNELID1 1449921
+#define WIFISSID "Arafat Tanin"
 #define PASSWORD "NoConnectioN"
 #define WRITEAPI1 "350OMYM5YGOUUADF"
 
 WiFiClient client;
 
-enum channelFields { BODYTEMP, ROOMTEMP, ROOMHUM, PULSE };
 unsigned long CHANNELID = 1449921;
 const char * WRITEAPI = "350OMYM5YGOUUADF";
+enum channelFields { BODYTEMP, ROOMTEMP, ROOMHUM, PULSE };
 
 void setup() {
   Serial.begin(115200);
@@ -20,12 +20,12 @@ void setup() {
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
   }
-  Serial.println("Successfully in here");
+  
   /* Connection for WiFi */
   WiFi.begin(WIFISSID, PASSWORD); 
   
   while(WiFi.status() != WL_CONNECTED){
-    delay(200);
+    delay(2000);
     Serial.println("Reconnecting...");
   }
   
