@@ -2,16 +2,16 @@
 #include <ThingSpeak.h>
 #include <ESP8266WiFi.h>
 
-#define WIFISSID "Arafat Tanin"
 #define CHANNELID1 1449921
+#define WIFISSID "Arafat Tanin"
 #define PASSWORD "NoConnectioN"
 #define WRITEAPI1 "350OMYM5YGOUUADF"
 
 WiFiClient client;
 
-enum channelFields { BODYTEMP, ROOMTEMP, ROOMHUM, PULSE };
 unsigned long CHANNELID = 1449921;
 const char * WRITEAPI = "350OMYM5YGOUUADF";
+enum channelFields {BODYTEMP=1, ROOMTEMP=2, ROOMHUM=3, PULSE=4};
 
 void setup() {
   Serial.begin(115200);
@@ -20,7 +20,7 @@ void setup() {
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
   }
-  Serial.println("Successfully in here");
+  
   /* Connection for WiFi */
   WiFi.begin(WIFISSID, PASSWORD); 
   
@@ -50,29 +50,38 @@ void writeToThingSpeak(int fieldNo, float data, bool isInt){
 
 void loop() {
   if(Serial.available() > 0){
-    // delay(17000);
-  int heartbeat = Serial.read();
+    
+    //delay(17000);
+    int heartbeat = Serial.read();
 
-  writeToThingSpeak(PULSE+1, heartbeat, true);
-  Serial.print("In esp HeartBeat: ");
-  Serial.print(heartbeat);
-  //delay(5000);
+    writeToThingSpeak(PULSE, heartbeat, true);
+    Serial.print("In esp HeartBeat: ");
+    Serial.print(heartbeat);
+    //delay(5000);
   
-  float humidity = Serial.read();
+    float humidity = Serial.read();
 
-  writeToThingSpeak(ROOMHUM+1, humidity, false);
-  Serial.print(" Humidity: ");
-  Serial.println(humidity);
-  //delay(5000);
+    writeToThingSpeak(ROOMHUM, humidity, false);
+    Serial.print(" Humidity: ");
+    Serial.println(humidity);
+    //delay(5000);
 
-  float temp = Serial.read();
+    float tempRoom = Serial.read();
 
-  writeToThingSpeak(ROOMTEMP+1, temp, false);
-  Serial.print(" Tempearture: ");
-  Serial.println(temp);
-  //delay(5000);
-  delay(17000);
+    writeToThingSpeak(ROOMTEMP, tempRoom, false);
+    Serial.print(" Tempearture: ");
+    Serial.println(tempRoom);
+    //delay(5000);
+
+    float tempBody = Serial.read();
+
+    writeToThingSpeak(BODYTEMP, tempBody, false);
+    Serial.print(" Tempearture: ");
+    Serial.println(tempBody);
+    //delay(5000);
+    
+    delay(17000);
   }else{
-    Serial.println("Nothing available at that moment");
+    Serial.println("Nothing available to read at that moment");
   }
 }
