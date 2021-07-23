@@ -18,6 +18,8 @@
 #include <PulseSensorPlayground.h>     /* Includes the PulseSensorPlayground Library. */
 
 /* Variables */
+SoftwareSerial sim800(GTX, GRX);
+SoftwareSerial esp8266(ETX, ERX);               /* For esp8266 module */
 DHT dhtSensor(DHTPIN, DHTTYPE);
 SoftwareSerial sim800(GTX, GRX);
 SoftwareSerial esp8266(ETX, ERX);       /* For esp8266 module */
@@ -47,6 +49,7 @@ void setup() {
   Serial.begin(9600);
   sim800.begin(9600);
   esp8266.begin(115200);
+  sim800.begin(9600);
   
   lcd.begin(16,2);
   lcd.clear();
