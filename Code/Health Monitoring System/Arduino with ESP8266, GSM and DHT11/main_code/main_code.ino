@@ -66,6 +66,9 @@ void setup() {
   Serial.printlb("SIM800 ready...");
 
   /* AT command to set SIM800 to SMS mode */
+  Serial.print("SIM800 ready...");
+
+  // AT command to set SIM800 to SMS mode
   sim800.print("AT+CMGF=1\r"); 
   delay(100);
   
@@ -315,7 +318,7 @@ void loop(){
   
   esp8266Module();
   //delay(UNIVERSALDELAY*5);
-  
+
   simModule();
   delay(UNIVERSALDELAY);
 }
