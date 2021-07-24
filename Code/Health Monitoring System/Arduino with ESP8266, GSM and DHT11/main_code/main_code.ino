@@ -1,7 +1,8 @@
 #include <DHT.h>
 #include <DHT_U.h>
 #include<LiquidCrystal.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
+#include <NeoSWSerial.h>
 #include <Adafruit_Sensor.h>
 
 #define ETX 3
@@ -19,8 +20,8 @@
 
 /* Variables */
 DHT dhtSensor(DHTPIN, DHTTYPE);
-SoftwareSerial sim800(GTX, GRX);
-SoftwareSerial esp8266(ETX, ERX);       /* For esp8266 module */
+NeoSWSerial sim800(GTX, GRX);
+NeoSWSerial esp8266(ETX, ERX);       /* For esp8266 module */
 PulseSensorPlayground pulseSensor;      /* Creates an instance of the PulseSensorPlayground object called "pulseSensor" */
 LiquidCrystal lcd(5, 6, 7, 8, 9, 10);   /* R, En, D5-D7 respectively */
 
@@ -38,6 +39,11 @@ volatile float celciusTemperature;
 unsigned long previousMillis = 0; /* last time update */
 long interval = 300000; /* interval at which to do something (milliseconds)(5 min) */
 
+static void handleRxChar( uint8_t c ) 
+{
+  //this function will check every data from sim800 and c is the reading
+ 
+}
 void setup() {
   /* put your setup code here, to run once: */
   pulseSensor.analogInput(PulseWire);   
@@ -45,7 +51,10 @@ void setup() {
   pulseSensor.setThreshold(Threshold);
    
   Serial.begin(9600);
+  
+  sim800.attachInterrupt( handleRxChar );
   sim800.begin(9600);
+  
   esp8266.begin(115200);
   
   lcd.begin(16,2);
@@ -63,7 +72,7 @@ void setup() {
   delay(20000);
   
   Serial.println();
-  Serial.printlb("SIM800 ready...");
+  Serial.println("SIM800 ready...");
 
   /* AT command to set SIM800 to SMS mode */
   Serial.print("SIM800 ready...");
@@ -304,6 +313,7 @@ void simModule(){
     delay(10);
   }
 }
+
 
 void loop(){
   /* put your main code here, to run repeatedly: */
