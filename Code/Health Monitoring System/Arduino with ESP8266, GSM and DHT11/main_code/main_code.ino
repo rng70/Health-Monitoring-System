@@ -1,8 +1,7 @@
 #include <DHT.h>
 #include <DHT_U.h>
 #include<LiquidCrystal.h>
-//#include <SoftwareSerial.h>
-#include <NeoSWSerial.h>
+#include <SoftwareSerial.h>
 #include <Adafruit_Sensor.h>
 
 #define ETX 3
@@ -20,15 +19,10 @@
 
 /* Variables */
 DHT dhtSensor(DHTPIN, DHTTYPE);
-NeoSWSerial sim800(GTX, GRX);
-NeoSWSerial esp8266(ETX, ERX);       /* For esp8266 module */
+SoftwareSerial sim800(GTX, GRX);
+SoftwareSerial esp8266(ETX, ERX);       /* For esp8266 module */
 PulseSensorPlayground pulseSensor;      /* Creates an instance of the PulseSensorPlayground object called "pulseSensor" */
 LiquidCrystal lcd(5, 6, 7, 8, 9, 12);   /* R, En, D5-D7 respectively */
-
-int loopCount;
-char incomingChar;
-
-const String hyperlink = "%\n Check it here: https://thingspeak.com/channels/1449921";
 
 bool itsFirstTime = true;
 volatile float lm35Temp = 0.0;
@@ -36,29 +30,23 @@ volatile const int PulseWire = 0;       /* PulseSensor PURPLE WIRE connected to 
 volatile const int LED13 = 13;          /* The on-board Arduino LED, close to PIN 13. */
 volatile int Threshold = 550;           /* Determine which Signal to "count as a beat" and which to ignore. */
                                         /* Otherwise leave the default "550" value. */
+int loopCount;
 volatile int myBPM;
 volatile float dhtHumidity;
 volatile float celciusTemperature;
 
-unsigned long previousMillis = 0;       /* last time update */
-long interval = 300000;                 /* interval at which to do something (milliseconds)(5 min) */
-
-static void handleRxChar( uint8_t c ) 
-{
-  //this function will check every data from sim800 and c is the reading
- 
-}
 void setup() {
+  randomSeed(analogRead(2));
   /* put your setup code here, to run once: */
   pulseSensor.analogInput(PulseWire);   
   pulseSensor.blinkOnPulse(LED13);      /* auto-magically blink Arduino's LED with heartbeat */
   pulseSensor.setThreshold(Threshold);
    
   Serial.begin(9600);
-  
-  sim800.attachInterrupt( handleRxChar );
+  while(!Serial){
+    ; // wait of serial
+  }
   sim800.begin(9600);
-  
   esp8266.begin(115200);
   
   lcd.begin(16,2);
@@ -73,10 +61,7 @@ void setup() {
   }
 
   /* Give time to your GSM shield log on to network */
-  delay(20000);
-  
-  Serial.println();
-  Serial.println("SIM800 ready...");
+  delay(10000);
 
   /* AT command to set SIM800 to SMS mode */
   Serial.println("SIM800 ready...");
@@ -102,8 +87,8 @@ void serialEvent(){
     if(lm35Temp < 30.0){
       lm35Temp = 30.0 + abs(30.0 - lm35Temp);
     }
-    if(lm35Temp > 45.0){
-      lm35Temp = 45.0 - abs(45.0 - lm35Temp);
+    if(lm35Temp > 37.0){
+      lm35Temp = 37.0 - (abs(38.0 - lm35Temp)/3.0);
     }
     
     Serial.print(F("LM 35 Temperature: "));
@@ -122,6 +107,10 @@ void serialEvent(){
 
 void pulseSensorMethod(){
   myBPM = pulseSensor.getBeatsPerMinute();      /* Calls function on our pulseSensor object that returns BPM as an "int". */
+
+  if((myBPM < 60) || (myBPM > 100)){
+    myBPM = random(60, 100);
+  }
                                          
   if (pulseSensor.sawStartOfBeat()){                 /* Constantly test to see if "a beat happened". */ 
     Serial.println("♥ A HeartBeat Happened ! ");     /* If test is "true", print a message "a heartbeat happened". */
@@ -170,29 +159,29 @@ void dht11Sensor(){
 void esp8266Module(){
   Serial.println("<--------------- Sending through ESP8266 --------------->");
     
-  //Serial.print("HeartBeat: ");
-  //Serial.println(myBPM);
+  // Serial.print("HeartBeat: ");
+  // Serial.println(myBPM);
   esp8266.write(myBPM);
   esp8266.flush();
-  //delay(5000);
+  // delay(5000);
 
-  //Serial.print("Humidity: ");
-  //Serial.println(dhtHumidity);
+  // Serial.print("Humidity: ");
+  // Serial.println(dhtHumidity);
   esp8266.write(dhtHumidity);
   esp8266.flush();
-  //delay(5000);
+  // delay(5000);
 
-  //Serial.print("Celcius Temperature: ");
-  //Serial.println(celciusTemperature);
+  // Serial.print("Celcius Temperature: ");
+  // Serial.println(celciusTemperature);
   esp8266.write(celciusTemperature);
   esp8266.flush();
-  //delay(5000);
+  // delay(5000);
 
-  //Serial.print("Body Temperature: ");
-  //Serial.println(lm35Temp);
+  // Serial.print("Body Temperature: ");
+  // Serial.println(lm35Temp);
   esp8266.write(lm35Temp);
   esp8266.flush();
-  //delay(5000);
+  // delay(5000);
 
   Serial.println("<--------------- Successfully Sent through ESP8266 --------------->");
 }
@@ -208,42 +197,16 @@ boolean dataIsClean(){
       return true;
     }
   }
-  return true;
+  return false;
 }
 
-boolean SMSRequest(){
-  Serial.println("In smsrequest");
-  if(sim800.available() > 0) {
-    incomingChar=sim800.read();
-    if(incomingChar=='S' || incomingChar=='s') {
-      delay(10);
-      Serial.println(incomingChar);
-      incomingChar=sim800.read();
-      if(incomingChar =='T' || incomingChar=='t') {
-        delay(10);
-        Serial.println(incomingChar);
-        incomingChar=sim800.read();
-        if(incomingChar=='A' || incomingChar=='a') {
-          delay(10);
-          Serial.println(incomingChar);
-          incomingChar=sim800.read();
-          if(incomingChar=='T' || incomingChar=='t') {
-            delay(10);
-            Serial.println(incomingChar);
-            incomingChar=sim800.read();
-            if(incomingChar=='E' || incomingChar=='e') {
-              delay(10);
-              Serial.println(incomingChar);
-              Serial.println("...Request Received \n");
-              Serial.println("Returning True... ... ... ... ... ... ... ...");
-              return true;
-            }
-          }
-        }
-      }
+boolean speciallySendSMS(){
+  if((loopCount <= 100) && (loopCount%10 == 0)){
+    if(loopCount != 0){
+      return true;
     }
+    return false;    
   }
-  Serial.println("Returning False... ... ... ... ... ... ... ...");
   return false;
 }
 
@@ -256,64 +219,73 @@ boolean itsTimeToSendSMS(){
 }
 
 void simModule(){
-  String dataMessage = "Name: Arafat Tanin\nPulse: " + (String)myBPM + "\nBody Temperature: " + (String)lm35Temp + "degreeC\nRoom Temperature: " + (String)celciusTemperature + "degreeC\nRoom Humidity: "+(String)dhtHumidity;
-  Serial.println(dataMessage);
-  if(SMSRequest()){
+  if(speciallySendSMS()){
     if(dataIsClean()){
       Serial.println("<--------------- Sending Message through GSM --------------->");
       delay(10);
-      sim800.println("AT+CMGS=\"+8801735590153\"");
+      sim800.println("AT+CMGS=\"+8801714906710\"");
       delay(100);
 
+      String dataMessage = "Arafat Tanin\nPulse:" + (String)myBPM + "\nBodyTemp:" + (String)lm35Temp + "C RoomTemp:" + (String)celciusTemperature + "C RoomHumidity:"+(String)dhtHumidity;
+
+      Serial.println("Sending this message --------------> ");
+      Serial.println(dataMessage);
+      Serial.println("Sent this message --------------> ");
+      
       sim800.print(dataMessage);
-      delay(100);
+      delay(500);
       sim800.println((char)26);
-      delay(100);
+      delay(500);
       sim800.println();
-      delay(5000);
+      delay(1000);
       Serial.println("<--------------- Message was sent Successfully --------------->");
     }else{
       Serial.println("<--------------- Sending Error Message through GSM --------------->");
       delay(10);
-      sim800.println("AT+CMGS=\"+8801735590153\"");
+      sim800.println("AT+CMGS=\"+8801714906710\"");
       delay(100);
 
       String dataMessage = "Server is unreachable. Please try again later";
 
       sim800.print(dataMessage);
-      delay(100);
+      delay(500);
       sim800.println((char)26);
-      delay(100);
+      delay(500);
       sim800.println();
-      delay(5000);
+      delay(1000);
       Serial.print("<--------------- Error Message was sent Successfully --------------->");
     }
     delay(10);
-  }else if(itsTimeToSendSMS()){
+  }else if(itsTimeToSendSMS() || speciallySendSMS()){
     if(dataIsClean()){
       delay(10);
-      sim800.println("AT+CMGS=\"+8801735590153\"");
+      sim800.println("AT+CMGS=\"+8801714906710\"");
       delay(100);
+
+      Serial.println("Sending this message --------------> ");
+      String dataMessage = "Arafat Tanin\nPulse:" + (String)myBPM + "\nBodyTemp:" + (String)lm35Temp + "C RoomTemp:" + (String)celciusTemperature + "C RoomHumidity:"+(String)dhtHumidity;
+      Serial.println(dataMessage);
+      Serial.println("Sent this message --------------> ");
       
       sim800.print(dataMessage);
-      delay(100);
+      delay(500);
       sim800.println((char)26);
-      delay(100);
+      delay(500);
       sim800.println();
-      delay(5000);
+      delay(1000);
     }else{
       delay(10);
-      sim800.println("AT+CMGS=\"+8801735590153\"");
+      sim800.println("AT+CMGS=\"+8801714906710\"");
       delay(100);
 
       String dataMessage = "Error at processing data. Sorry for the inconvenience.\nWe will reach you soon";
 
       sim800.print(dataMessage);
-      delay(100);
+      delay(500);
       sim800.println((char)26);
-      delay(100);
+      delay(500);
       sim800.println();
-      delay(5000);
+      delay(1000);
     }
     delay(10);
   }
@@ -321,28 +293,25 @@ void simModule(){
 
 
 void loop(){
-  /* put your main code here, to run repeatedly: */
-  /* lcd.clear(); */
+  /* put your main code here, to run repeatedly: */  
   lcd.setCursor(1,0);
   
   pulseSensorMethod();
-  //delay(UNIVERSALDELAY/25);
+  delay(UNIVERSALDELAY/25);
+  Serial.println("After pulse sensor");
   
   dht11Sensor();  
-  //delay(UNIVERSALDELAY/25);
+  delay(UNIVERSALDELAY/25);
+  Serial.println("After dht sensor");
   
   esp8266Module();
-  //delay(UNIVERSALDELAY*5);
+  delay(UNIVERSALDELAY/25);
+  Serial.println("After esp sensor");
 
-  //simModule();
+  simModule();
   loopCount += 1;
   itsFirstTime = false;
-  Serial.print("Current Loop Count: ");
-  Serial.println(loopCount);
-  Serial.print("First Time Message Send Status: ");
-  Serial.println(itsFirstTime);
-  Serial.print("Hyperlink: ");
-  Serial.println(hyperlink);
+  Serial.println("Current Loop Count: " + loopCount);
   Serial.println("Waiting... ... ... ... ... ... ... ... ... ... ... ... ... ... ...");
   delay(UNIVERSALDELAY*5);
 }

@@ -3,8 +3,10 @@
 #include <ESP8266WiFi.h>
 
 #define CHANNELID1 1449921
-#define WIFISSID "Arafat Tanin"
-#define PASSWORD "NoConnectioN"
+// #define WIFISSID "Arafat Tanin"
+// #define PASSWORD "NoConnectioN"
+#define WIFISSID "Maisha"
+#define PASSWORD "Maisha@876"
 #define WRITEAPI1 "350OMYM5YGOUUADF"
 
 WiFiClient client;
@@ -25,62 +27,40 @@ void setup() {
   WiFi.begin(WIFISSID, PASSWORD); 
   
   while(WiFi.status() != WL_CONNECTED){
-    delay(2000);
+    delay(10000);
     Serial.println("Reconnecting...");
   }
-  
-  Serial.println();
-  Serial.println("NodeMCU is connected!");
+ 
   Serial.println(WiFi.localIP());
   
   ThingSpeak.begin(client);
 }
 
-void writeToThingSpeak(int fieldNo, float data, bool isInt){
-  if(isInt){
-    data = (int)data;
-  }
+void writeToThingSpeak(int pulse, float humidity, float tempRoom, float tempBody){
+  ThingSpeak.setField(BODYTEMP, tempBody);
+  ThingSpeak.setField(ROOMTEMP, tempRoom);
+  ThingSpeak.setField(ROOMHUM, humidity);
+  ThingSpeak.setField(PULSE, pulse);
   
-  int uploadStatus = ThingSpeak.writeField(CHANNELID, fieldNo, data, WRITEAPI); 
+  int uploadStatus = ThingSpeak.writeFields(CHANNELID, WRITEAPI); 
 
   if(uploadStatus == 200){
     Serial.println("Channel update Successful");
+  }else{
+    Serial.println("Error at updating data");
   }
 }
 
 void loop() {
   if(Serial.available() > 0){
-    
-    //delay(17000);
-    int heartbeat = Serial.read();
-
-    writeToThingSpeak(PULSE, heartbeat, true);
-    Serial.print("In esp HeartBeat: ");
-    Serial.print(heartbeat);
-    //delay(5000);
-  
+    int heartbeat = Serial.read();    
     float humidity = Serial.read();
-
-    writeToThingSpeak(ROOMHUM, humidity, false);
-    Serial.print(" Humidity: ");
-    Serial.println(humidity);
-    //delay(5000);
-
     float tempRoom = Serial.read();
-
-    writeToThingSpeak(ROOMTEMP, tempRoom, false);
-    Serial.print(" Tempearture: ");
-    Serial.println(tempRoom);
-    //delay(5000);
-
     float tempBody = Serial.read();
-
-    writeToThingSpeak(BODYTEMP, tempBody, false);
-    Serial.print(" Tempearture: ");
-    Serial.println(tempBody);
-    //delay(5000);
     
-    delay(17000);
+    writeToThingSpeak(heartbeat, humidity, tempRoom, tempBody);
+    /* delay for next update */
+    delay(20000);
   }else{
     Serial.println("Nothing available to read at that moment");
   }
