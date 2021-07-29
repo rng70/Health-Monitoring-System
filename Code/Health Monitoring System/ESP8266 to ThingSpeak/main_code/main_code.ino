@@ -2,17 +2,17 @@
 #include <ThingSpeak.h>
 #include <ESP8266WiFi.h>
 
-#define CHANNELID1 1449921
+#define CHANNELID1 1448001
 // #define WIFISSID "Arafat Tanin"
 // #define PASSWORD "NoConnectioN"
 #define WIFISSID "Maisha"
 #define PASSWORD "Maisha@876"
-#define WRITEAPI1 "350OMYM5YGOUUADF"
+#define WRITEAPI1 "W4B6FXHWPVUBPSS0"
 
 WiFiClient client;
 
 unsigned long CHANNELID = 1449921;
-const char * WRITEAPI = "350OMYM5YGOUUADF";
+const char * WRITEAPI = "W4B6FXHWPVUBPSS0";
 enum channelFields {BODYTEMP=1, ROOMTEMP=2, ROOMHUM=3, PULSE=4};
 
 void setup() {
@@ -38,9 +38,11 @@ void setup() {
 
 void writeToThingSpeak(int pulse, float humidity, float tempRoom, float tempBody){
   ThingSpeak.setField(BODYTEMP, tempBody);
+  
   ThingSpeak.setField(ROOMTEMP, tempRoom);
-  ThingSpeak.setField(ROOMHUM, humidity);
   ThingSpeak.setField(PULSE, pulse);
+  ThingSpeak.setField(ROOMHUM, humidity);
+  
   
   int uploadStatus = ThingSpeak.writeFields(CHANNELID, WRITEAPI); 
 
