@@ -3,11 +3,13 @@
 #include <ESP8266WiFi.h>
 
 #define CHANNELID1 1448001
-// #define WIFISSID "Arafat Tanin"
-// #define PASSWORD "NoConnectioN"
-#define WIFISSID "Maisha"
-#define PASSWORD "Maisha@876"
-#define WRITEAPI1 "W4B6FXHWPVUBPSS0"
+/* Uncomment this section with appropriate keys */
+/** 
+ *  #define WIFISSID SECRET_WIFI_SSID
+ *  #define PASSWORD SECRET_WIFI_PASSWORD
+ *  #define WRITEAPI1 SECRET_THINGSPEAK_WRITEAPI
+ */
+// 
 
 WiFiClient client;
 
@@ -17,10 +19,9 @@ enum channelFields {BODYTEMP=1, ROOMTEMP=2, ROOMHUM=3, PULSE=4};
 
 void setup() {
   Serial.begin(115200);
-  // delay(1000);
 
   while (!Serial) {
-   ; // wait for serial port to connect. Needed for native USB port only
+   ; /* wait for serial port to connect. Needed for native USB port only */
   }
   
   /* Connection for WiFi */

@@ -6,6 +6,9 @@
 
 IoT based Health Monitoring System is a project for Hardware lab. This repository contains detailed description about the project and code also.
 
+*   Find the report on this project [here](./Presentation/Report%20on%20Health%20Monitoring%20System.pdf)
+*   Find the project on YouTube [here(only in Bengali)](https://www.youtube.com/watch?v=d_PLmtr2TyY&ab_channel=MaishaRahman)
+
 
 
 ### Motivation
@@ -49,6 +52,12 @@ Overall system design is included here,
 ---
 
 
+
+# Circuit Diagram
+
+The main circuit components and diagram shown below
+
+![System Design](./Image/Circuit_Diagram.png)
 
 # Contribution
 

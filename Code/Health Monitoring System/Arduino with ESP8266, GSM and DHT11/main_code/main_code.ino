@@ -44,7 +44,7 @@ void setup() {
    
   Serial.begin(9600);
   while(!Serial){
-    ; // wait of serial
+    ; /* wait of serial */
   }
   sim800.begin(9600);
   esp8266.begin(115200);
@@ -66,7 +66,7 @@ void setup() {
   /* AT command to set SIM800 to SMS mode */
   Serial.println("SIM800 ready...");
 
-  // AT command to set SIM800 to SMS mode
+  /* AT command to set SIM800 to SMS mode */
   sim800.print("AT+CMGF=1\r"); 
   delay(100);
   
@@ -158,30 +158,18 @@ void dht11Sensor(){
 
 void esp8266Module(){
   Serial.println("<--------------- Sending through ESP8266 --------------->");
-    
-  // Serial.print("HeartBeat: ");
-  // Serial.println(myBPM);
+
   esp8266.write(myBPM);
   esp8266.flush();
-  // delay(5000);
 
-  // Serial.print("Humidity: ");
-  // Serial.println(dhtHumidity);
   esp8266.write(dhtHumidity);
   esp8266.flush();
-  // delay(5000);
 
-  // Serial.print("Celcius Temperature: ");
-  // Serial.println(celciusTemperature);
   esp8266.write(celciusTemperature);
   esp8266.flush();
-  // delay(5000);
 
-  // Serial.print("Body Temperature: ");
-  // Serial.println(lm35Temp);
   esp8266.write(lm35Temp);
   esp8266.flush();
-  // delay(5000);
 
   Serial.println("<--------------- Successfully Sent through ESP8266 --------------->");
 }

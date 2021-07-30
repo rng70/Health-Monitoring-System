@@ -2,7 +2,7 @@
  * GccApplication3.c
  *
  * Created: 7/16/2021 12:41:41 PM
- * Author : my
+ * Author : maisharahman876
  */ 
 #define F_CPU 1000000
 
@@ -17,21 +17,21 @@ ISR(ADC_vect){
 }
 
 void UART_init(void){
-	// Normal speed, disable multi-proc
+	/* Normal speed, disable multi-proc */
 	UCSRA = 0b00000000;
-	// Enable Tx and Rx, disable interrupts
+	/* Enable Tx and Rx, disable interrupts */
 	UCSRB = 0b00001000;
-	// Asynchronous mode, no parity, 1 stop bit, 8 data bits
+	/* Asynchronous mode, no parity, 1 stop bit, 8 data bits */
 	UCSRC = 0b10000110;
-	// Baud rate 1200bps, assuming 1MHz clock
+	/* Baud rate 1200bps, assuming 1MHz clock */
 	UBRRL = 0x12;
 	UBRRH = 0x00;
 }
 
 void UART_send(unsigned char data){
-	// wait until UDRE flag is set to logic 1
+	/* wait until UDRE flag is set to logic 1 */
 	while ((UCSRA & (1<<UDRE)) == 0x00);
-	UDR = data; // Write character to UDR for 				 transmission
+	UDR = data; /* Write character to UDR for transmission */
 }
 
 int main(void){
@@ -45,4 +45,3 @@ int main(void){
 		UART_send(result);
     }
 }
-
