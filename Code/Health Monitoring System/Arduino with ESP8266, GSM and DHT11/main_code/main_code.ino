@@ -36,7 +36,6 @@ volatile float dhtHumidity;
 volatile float celciusTemperature;
 
 void setup() {
-  randomSeed(analogRead(2));
   /* put your setup code here, to run once: */
   pulseSensor.analogInput(PulseWire);   
   pulseSensor.blinkOnPulse(LED13);      /* auto-magically blink Arduino's LED with heartbeat */
@@ -84,12 +83,6 @@ void serialEvent(){
     }
 
     lm35Temp /= 100.0;
-    if(lm35Temp < 30.0){
-      lm35Temp = 30.0 + abs(30.0 - lm35Temp);
-    }
-    if(lm35Temp > 37.0){
-      lm35Temp = 37.0 - (abs(38.0 - lm35Temp)/3.0);
-    }
     
     Serial.print(F("LM 35 Temperature: "));
     Serial.print(lm35Temp);
@@ -107,10 +100,6 @@ void serialEvent(){
 
 void pulseSensorMethod(){
   myBPM = pulseSensor.getBeatsPerMinute();      /* Calls function on our pulseSensor object that returns BPM as an "int". */
-
-  if((myBPM < 60) || (myBPM > 100)){
-    myBPM = random(60, 100);
-  }
                                          
   if (pulseSensor.sawStartOfBeat()){                 /* Constantly test to see if "a beat happened". */ 
     Serial.println("♥ A HeartBeat Happened ! ");     /* If test is "true", print a message "a heartbeat happened". */
